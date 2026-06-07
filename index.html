@@ -186,80 +186,85 @@ function addSignals(stock, meta) {
   return stock;
 }
 
+var lastApiCall = 0;
+var batch = 0;
+
+function generateSimulated(offset) {
+  var d = new Date();
+  var seed = d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()+offset*97;
+  var r = rng(seed);
+  var arr = UNI.slice().sort(function(){return r()-0.5;}).slice(0,10);
+  var stocks = arr.map(function(meta){
+    var price = (r()*4.5+0.05);
+    var chg = (r()*18+2)*(r()>0.2?1:-1);
+    var stock = {ticker:meta.t, price:Math.round(price*1000)/1000, chg:Math.round(chg*10)/10, vol:Math.round((r()*4+1.5)*10)/10, isLive:false};
+    return addSignals(stock, meta);
+  });
+  stocks.sort(function(a,b){return b.sig-a.sig;});
+  return stocks;
+}
+
+async function tryFetchLive() {
+  var now = Date.now();
+  if(now - lastApiCall < 60000) return null; // 1 min cooldown
+  lastApiCall = now;
+  try {
+    var symbols = UNI.slice(0,8).map(function(u){return u.t.replace(".V",":TSX");});
+    var url = "https://api.twelvedata.com/quote?symbol="+encodeURIComponent(symbols.join(","))+"&apikey="+API_KEY;
+    var resp = await fetch(url, {signal: AbortSignal.timeout(6000)});
+    if(!resp.ok) return null;
+    var data = await resp.json();
+    if(data.status==="error") return null;
+    var results = {};
+    if(data.symbol){ results[data.symbol]=data; }
+    else { for(var k in data){ if(data[k]&&data[k].close&&data[k].close!=="NA") results[k]=data[k]; } }
+    var scored = [];
+    UNI.forEach(function(meta){
+      var q = results[meta.t.replace(".V",":TSX")];
+      if(q&&q.close&&parseFloat(q.close)>0){
+        var price=parseFloat(q.close), open=parseFloat(q.open)||price;
+        var chg=open>0?Math.round((price-open)/open*1000)/10:0;
+        scored.push(addSignals({ticker:meta.t,price:price,chg:chg,vol:1.0,isLive:true},meta));
+      }
+    });
+    if(scored.length===0) return null;
+    scored.sort(function(a,b){return b.sig-a.sig;});
+    return scored.slice(0,10);
+  } catch(e){ return null; }
+}
+
 async function loadData() {
   var btn = document.getElementById("rbtn");
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>正在获取实时行情...';
-  document.getElementById("status").textContent = "连接 Twelve Data...";
-  document.getElementById("cards").innerHTML = "";
+  btn.innerHTML = '<span class="spinner"></span>正在加载...';
+  document.getElementById("status").textContent = "尝试获取实时数据...";
 
-  try {
-    // Twelve Data free tier: 8 req/min, fetch all in ONE request (up to 8 symbols)
-    // Pick first 8 symbols only to stay within limit
-    var symbols = UNI.slice(0, 8).map(function(u){ return u.t.replace(".V",":TSX"); });
-    var results = {};
-
-    document.getElementById("status").textContent = "正在获取实时数据...";
-    var url = "https://api.twelvedata.com/quote?symbol=" +
-      encodeURIComponent(symbols.join(",")) +
-      "&apikey=" + API_KEY;
-    var resp = await fetch(url);
-    if(!resp.ok) throw new Error("HTTP " + resp.status);
-    var data = await resp.json();
-    if(data.status === "error") throw new Error(data.message || "API错误");
-    // Single symbol returns object directly; multiple returns {SYMBOL: {...}}
-    if(data.symbol) {
-      results[data.symbol] = data;
-    } else {
-      for(var k in data) {
-        if(data[k] && data[k].close && data[k].close !== "NA") results[k] = data[k];
-      }
-    }
-
-    // Build scored stock list
-    var scored = [];
-    UNI.forEach(function(meta) {
-      var key = meta.t.replace(".V", ":TSX");
-      var q = results[key];
-      if(q && q.close && q.close !== "NA" && parseFloat(q.close) > 0) {
-        var price = parseFloat(q.close);
-        var open = parseFloat(q.open) || price;
-        var chg = open > 0 ? Math.round((price - open) / open * 1000) / 10 : 0;
-        var stock = { ticker:meta.t, price:price, chg:chg, vol:1.0, isLive:true };
-        scored.push(addSignals(stock, meta));
-      }
-    });
-
-    if(scored.length === 0) throw new Error("未获取到有效数据，请稍后重试");
-
-    // Sort by signal, take top 10
-    scored.sort(function(a,b){ return b.sig - a.sig; });
-    allStocks = scored.slice(0, 10);
-
-    // Sentiment based on average change
-    var avgChg = allStocks.reduce(function(s,x){return s+x.chg;},0) / allStocks.length;
-    var sc2, sl, sn;
-    if(avgChg > 1.5){ sc2="#34d399"; sl="看多"; sn="创业板整体偏多，多支个股出现放量上涨信号"; }
-    else if(avgChg < -1.5){ sc2="#f87171"; sl="看空"; sn="市场情绪偏谨慎，多支个股承压，注意控制风险"; }
-    else { sc2="#fbbf24"; sl="中性"; sn="市场方向不明，个股行情分化，精选个股机会"; }
-
-    document.getElementById("sdot").style.cssText="width:8px;height:8px;border-radius:50%;display:inline-block;background:"+sc2+";box-shadow:0 0 8px "+sc2;
-    document.getElementById("slabel").style.color = sc2;
-    document.getElementById("slabel").textContent = sl;
-    document.getElementById("snote").textContent = sn;
-
-    var now = new Date();
-    document.getElementById("cr").textContent = now.toLocaleDateString("zh-CN") + " " + now.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});
-    document.getElementById("status").textContent = "✅ 实时数据 · " + allStocks.length + " 支已加载";
-
-    renderCards();
-
-  } catch(e) {
-    document.getElementById("status").innerHTML = "⚠️ " + e.message;
+  batch++;
+  var liveStocks = await tryFetchLive();
+  if(liveStocks) {
+    allStocks = liveStocks;
+    document.getElementById("status").textContent = "✅ 实时行情已加载";
+  } else {
+    allStocks = generateSimulated(batch);
+    document.getElementById("status").textContent = "📊 模拟数据（实时数据暂不可用）";
   }
 
-  btn.disabled = false;
-  btn.innerHTML = "🔄 刷新实时行情";
+  var avgChg = allStocks.reduce(function(s,x){return s+x.chg;},0)/allStocks.length;
+  var sc2,sl,sn;
+  if(avgChg>1.5){sc2="#34d399";sl="看多";sn="创业板整体偏多，多支个股出现放量上涨信号";}
+  else if(avgChg<-1.5){sc2="#f87171";sl="看空";sn="市场情绪偏谨慎，多支个股承压，注意控制风险";}
+  else{sc2="#fbbf24";sl="中性";sn="市场方向不明，个股行情分化，精选个股机会";}
+
+  document.getElementById("sdot").style.cssText="width:8px;height:8px;border-radius:50%;display:inline-block;background:"+sc2+";box-shadow:0 0 8px "+sc2;
+  document.getElementById("slabel").style.color=sc2;
+  document.getElementById("slabel").textContent=sl;
+  document.getElementById("snote").textContent=sn;
+  var now=new Date();
+  document.getElementById("cr").textContent=now.toLocaleDateString("zh-CN")+" "+now.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});
+
+  renderCards();
+  btn.disabled=false;
+  btn.innerHTML="🔄 刷新行情";
 }
 
 function renderCards(){
