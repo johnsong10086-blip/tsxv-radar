@@ -194,35 +194,27 @@ async function loadData() {
   document.getElementById("cards").innerHTML = "";
 
   try {
-    // Fetch in batches of 8 (free tier limit)
-    var batch1 = UNI.slice(0, 8).map(function(u){ return u.t.replace(".V",":TSX"); });
-    var batch2 = UNI.slice(8, 16).map(function(u){ return u.t.replace(".V",":TSX"); });
-    var batch3 = UNI.slice(16).map(function(u){ return u.t.replace(".V",":TSX"); });
-
+    // Twelve Data free tier: 8 req/min, fetch all in ONE request (up to 8 symbols)
+    // Pick first 8 symbols only to stay within limit
+    var symbols = UNI.slice(0, 8).map(function(u){ return u.t.replace(".V",":TSX"); });
     var results = {};
 
-    async function fetchBatch(symbols) {
-      var url = "https://api.twelvedata.com/quote?symbol=" +
-        encodeURIComponent(symbols.join(",")) +
-        "&apikey=" + API_KEY;
-      var resp = await fetch(url);
-      if(!resp.ok) throw new Error("HTTP " + resp.status);
-      var data = await resp.json();
-      // If single symbol, wrap it
-      if(data.symbol) { results[data.symbol] = data; }
-      else {
-        for(var k in data) {
-          if(data[k] && data[k].close) results[k] = data[k];
-        }
+    document.getElementById("status").textContent = "正在获取实时数据...";
+    var url = "https://api.twelvedata.com/quote?symbol=" +
+      encodeURIComponent(symbols.join(",")) +
+      "&apikey=" + API_KEY;
+    var resp = await fetch(url);
+    if(!resp.ok) throw new Error("HTTP " + resp.status);
+    var data = await resp.json();
+    if(data.status === "error") throw new Error(data.message || "API错误");
+    // Single symbol returns object directly; multiple returns {SYMBOL: {...}}
+    if(data.symbol) {
+      results[data.symbol] = data;
+    } else {
+      for(var k in data) {
+        if(data[k] && data[k].close && data[k].close !== "NA") results[k] = data[k];
       }
     }
-
-    document.getElementById("status").textContent = "获取第1批数据...";
-    await fetchBatch(batch1);
-    document.getElementById("status").textContent = "获取第2批数据...";
-    await fetchBatch(batch2);
-    document.getElementById("status").textContent = "获取第3批数据...";
-    await fetchBatch(batch3);
 
     // Build scored stock list
     var scored = [];
