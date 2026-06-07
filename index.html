@@ -182,14 +182,34 @@ function yahooUrl(symbols) {
 
 async function fetchQuotes(tickers) {
   var symbols = tickers.map(function(t){ return t.t; });
-  var resp = await fetch(yahooUrl(symbols));
-  if(!resp.ok) throw new Error("网络请求失败");
-  var data = await resp.json();
-  var parsed = JSON.parse(data.contents);
-  var quotes = parsed.quoteResponse.result;
-  var map = {};
-  quotes.forEach(function(q){ map[q.symbol] = q; });
-  return map;
+  var yahooEndpoint = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" +
+    encodeURIComponent(symbols.join(",")) +
+    "&fields=symbol,shortName,regularMarketPrice,regularMarketChangePercent,regularMarketVolume,averageDailyVolume3Month";
+
+  // Try multiple CORS proxies
+  var proxies = [
+    "https://api.allorigins.win/get?url=",
+    "https://corsproxy.io/?",
+  ];
+
+  var lastErr = null;
+  for (var i = 0; i < proxies.length; i++) {
+    try {
+      var url = proxies[i] + encodeURIComponent(yahooEndpoint);
+      var resp = await fetch(url, {signal: AbortSignal.timeout(8000)});
+      if (!resp.ok) continue;
+      var data = await resp.json();
+      // allorigins wraps in {contents:}, corsproxy returns directly
+      var raw = data.contents !== undefined ? data.contents : JSON.stringify(data);
+      var parsed = JSON.parse(raw);
+      if (parsed.quoteResponse && parsed.quoteResponse.result && parsed.quoteResponse.result.length > 0) {
+        var map = {};
+        parsed.quoteResponse.result.forEach(function(q){ map[q.symbol] = q; });
+        return map;
+      }
+    } catch(e) { lastErr = e; }
+  }
+  throw new Error("数据获取失败，请检查网络后重试");
 }
 
 // ── Score stocks by signal strength ─────────────────────────────────────────
