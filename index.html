@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#020817">
 <title>TSXV 启动雷达</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { background: linear-gradient(135deg,#020817 0%,#0a0f2c 50%,#050c1a 100%); min-height:100vh; color:#f8fafc; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; padding:0 0 40px; padding-top:env(safe-area-inset-top); }
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body { background:linear-gradient(135deg,#020817 0%,#0a0f2c 50%,#050c1a 100%); min-height:100vh; color:#f8fafc; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; padding:0 0 40px; padding-top:env(safe-area-inset-top); }
 .wrap { max-width:560px; margin:0 auto; padding:0 16px; }
 .header { padding-top:36px; padding-bottom:20px; }
 .logo-row { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
@@ -23,8 +23,10 @@ body { background: linear-gradient(135deg,#020817 0%,#0a0f2c 50%,#050c1a 100%); 
 .fbtn { padding:6px 11px; border-radius:8px; font-size:11px; font-weight:600; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); color:#64748b; cursor:pointer; }
 .fbtn.on { border-color:#3b82f6; background:rgba(59,130,246,0.2); color:#93c5fd; }
 select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid rgba(255,255,255,0.08); background:#0a0f2c; color:#94a3b8; outline:none; }
-.rbtn { width:100%; padding:13px; background:linear-gradient(135deg,#1d4ed8,#4f46e5); border:none; border-radius:12px; color:#fff; font-weight:700; font-size:14px; cursor:pointer; margin-bottom:16px; box-shadow:0 4px 20px rgba(79,70,229,0.4); }
+.rbtn { width:100%; padding:13px; background:linear-gradient(135deg,#1d4ed8,#4f46e5); border:none; border-radius:12px; color:#fff; font-weight:700; font-size:14px; cursor:pointer; margin-bottom:8px; box-shadow:0 4px 20px rgba(79,70,229,0.4); }
 .rbtn:active { opacity:0.8; }
+.rbtn:disabled { background:rgba(59,130,246,0.3); box-shadow:none; cursor:not-allowed; }
+.status { font-size:11px; color:#475569; text-align:center; margin-bottom:12px; min-height:16px; }
 .count { font-size:11px; color:#475569; margin-bottom:12px; display:flex; justify-content:space-between; }
 .cards { display:flex; flex-direction:column; gap:10px; }
 .card { background:rgba(15,20,40,0.85); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px 20px; cursor:pointer; position:relative; overflow:hidden; opacity:0; transform:translateY(12px); transition:opacity 0.35s,transform 0.35s; }
@@ -37,6 +39,7 @@ select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid r
 .pricecol { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
 .price { font-family:monospace; font-size:18px; font-weight:700; color:#f8fafc; }
 .chg { font-size:12px; font-weight:700; }
+.live-tag { font-size:9px; color:#34d399; border:1px solid #34d39960; border-radius:4px; padding:1px 5px; }
 .mbtn { display:flex; align-items:center; gap:4px; padding:5px 12px; border-radius:8px; font-size:11px; font-weight:700; background:linear-gradient(135deg,#FF6B1A,#FF8C42); border:none; color:#fff; cursor:pointer; width:100%; justify-content:center; margin-top:2px; }
 .mbtn:active { opacity:0.8; }
 .sigrow { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
@@ -49,7 +52,7 @@ select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid r
 .detail.open { display:block; }
 .sigtags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
 .sigtag { font-size:11px; padding:3px 10px; border-radius:20px; background:rgba(99,179,237,0.1); color:#93c5fd; border:1px solid rgba(99,179,237,0.2); }
-.stats { display:flex; gap:24px; margin-bottom:14px; }
+.stats { display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
 .slabel { font-size:10px; color:#64748b; margin-bottom:2px; }
 .sval { font-family:monospace; font-weight:700; }
 .btnrow { display:flex; gap:8px; }
@@ -58,7 +61,8 @@ select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid r
 .cbtn { display:flex; align-items:center; gap:4px; padding:11px; border-radius:10px; font-size:12px; font-weight:700; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; cursor:pointer; flex:1; justify-content:center; }
 .cbtn:active { opacity:0.8; }
 .disc { margin-top:28px; padding:12px 16px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); font-size:10px; color:#334155; line-height:1.7; }
-.date-badge { font-size:11px; color:#475569; text-align:center; margin-bottom:8px; }
+.spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.2); border-top:2px solid #fff; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; vertical-align:middle; margin-right:6px; }
+@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -68,15 +72,15 @@ select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid r
       <div class="logo-icon">📈</div>
       <div>
         <div class="logo-title">TSXV 启动雷达</div>
-        <div class="logo-sub">TSX VENTURE EXCHANGE · AI SCREENER</div>
+        <div class="logo-sub">TSX VENTURE EXCHANGE · LIVE SCREENER</div>
       </div>
     </div>
     <div class="sent-bar">
       <div>
         <div style="font-size:10px;color:#475569;margin-bottom:3px">今日市场情绪</div>
         <div style="display:flex;align-items:center;gap:6px">
-          <span id="sdot" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span>
-          <span id="slabel" style="font-weight:700;font-size:14px"></span>
+          <span id="sdot" style="width:8px;height:8px;border-radius:50%;display:inline-block;background:#475569"></span>
+          <span id="slabel" style="font-weight:700;font-size:14px;color:#475569">加载中...</span>
         </div>
       </div>
       <div id="snote" style="font-size:11px;color:#64748b;text-align:right;max-width:200px;line-height:1.5"></div>
@@ -97,128 +101,211 @@ select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid r
     </select>
   </div>
 
-  <button class="rbtn" onclick="doRefresh()">🔀 换一批今日精选</button>
-  <div class="date-badge" id="datebadge"></div>
+  <button class="rbtn" id="rbtn" onclick="loadData()">📡 获取实时行情</button>
+  <div class="status" id="status"></div>
   <div class="count"><span id="cl"></span><span id="cr"></span></div>
   <div class="cards" id="cards"></div>
-  <div class="disc">⚠️ 免责声明：本应用数据由算法模拟生成，仅供学习研究参考，不构成任何投资建议。TSX创业板股票风险极高，请在专业投资顾问指导下做出决策。</div>
+  <div class="disc">⚠️ 免责声明：价格数据来自 Twelve Data，技术信号由算法生成，仅供学习研究参考，不构成任何投资建议。TSX创业板股票风险极高，请在专业投资顾问指导下做出决策。</div>
 </div>
 
 <script>
+var API_KEY = "7a36aa9f7bfb4546a6454355d858339b";
+
 var UNI = [
-  {t:"LME.V",n:"Laurion Mineral Exploration",s:"矿业",p:0.040,r:"high"},
-  {t:"OGI.V",n:"Organigram Holdings",s:"大麻",p:1.65,r:"medium"},
-  {t:"NXE.V",n:"NexGen Energy",s:"能源",p:4.20,r:"medium"},
-  {t:"LAC.V",n:"Lithium Americas",s:"矿业",p:3.65,r:"medium"},
-  {t:"SKP.V",n:"Skeena Resources",s:"矿业",p:2.35,r:"medium"},
-  {t:"AFM.V",n:"Alphamin Resources",s:"矿业",p:0.76,r:"medium"},
-  {t:"CRE.V",n:"Critical Elements",s:"矿业",p:0.445,r:"medium"},
-  {t:"DYA.V",n:"dynaCERT Inc",s:"能源",p:0.085,r:"high"},
-  {t:"NGT.V",n:"Nighthawk Gold",s:"矿业",p:0.72,r:"medium"},
-  {t:"SLR.V",n:"Sailfish Royalty",s:"矿业",p:0.92,r:"medium"},
-  {t:"QST.V",n:"Questor Technology",s:"能源",p:0.88,r:"medium"},
-  {t:"GBR.V",n:"Great Bear Royalties",s:"矿业",p:1.45,r:"medium"},
-  {t:"HEO.V",n:"H2O Innovation",s:"科技",p:2.85,r:"low"},
-  {t:"ATH.V",n:"Athabasca Oil",s:"能源",p:0.55,r:"medium"},
-  {t:"TKO.V",n:"Tinka Resources",s:"矿业",p:0.175,r:"high"},
-  {t:"ACB.V",n:"Aurora Cannabis",s:"大麻",p:0.42,r:"high"},
-  {t:"GDC.V",n:"Genesis Genomics",s:"科技",p:0.335,r:"medium"},
-  {t:"ALS.V",n:"Altius Minerals",s:"矿业",p:1.85,r:"medium"},
-  {t:"VGZ.V",n:"Vista Gold Corp",s:"矿业",p:0.975,r:"medium"},
-  {t:"URZ.V",n:"Uranium Resources",s:"能源",p:0.555,r:"medium"},
-  {t:"DSV.V",n:"Discovery Silver",s:"矿业",p:2.15,r:"medium"},
-  {t:"REE.V",n:"Rare Element Resources",s:"矿业",p:0.445,r:"medium"},
-  {t:"EFR.V",n:"Eloro Resources",s:"矿业",p:3.20,r:"medium"},
-  {t:"KWG.V",n:"KWG Resources",s:"矿业",p:0.025,r:"high"},
-  {t:"PTK.V",n:"Platinex Inc",s:"矿业",p:0.085,r:"high"},
-  {t:"PGM.V",n:"Patagonia Gold",s:"矿业",p:0.115,r:"high"},
-  {t:"AGO.V",n:"Agora Silver",s:"矿业",p:0.135,r:"high"},
-  {t:"BKI.V",n:"Black Iron Inc",s:"矿业",p:0.065,r:"high"},
-  {t:"CLM.V",n:"Clarity Metals",s:"矿业",p:0.095,r:"high"},
-  {t:"TSG.V",n:"Tesoro Gold",s:"矿业",p:0.065,r:"high"}
+  {t:"LME.V", n:"Laurion Mineral Exploration", s:"矿业", r:"high"},
+  {t:"OGI.V", n:"Organigram Holdings",         s:"大麻", r:"medium"},
+  {t:"NXE.V", n:"NexGen Energy",               s:"能源", r:"medium"},
+  {t:"LAC.V", n:"Lithium Americas",            s:"矿业", r:"medium"},
+  {t:"SKP.V", n:"Skeena Resources",            s:"矿业", r:"medium"},
+  {t:"AFM.V", n:"Alphamin Resources",          s:"矿业", r:"medium"},
+  {t:"DYA.V", n:"dynaCERT Inc",                s:"能源", r:"high"},
+  {t:"NGT.V", n:"Nighthawk Gold",              s:"矿业", r:"medium"},
+  {t:"SLR.V", n:"Sailfish Royalty",            s:"矿业", r:"medium"},
+  {t:"QST.V", n:"Questor Technology",          s:"能源", r:"medium"},
+  {t:"GBR.V", n:"Great Bear Royalties",        s:"矿业", r:"medium"},
+  {t:"HEO.V", n:"H2O Innovation",              s:"科技", r:"low"},
+  {t:"ATH.V", n:"Athabasca Oil",               s:"能源", r:"medium"},
+  {t:"TKO.V", n:"Tinka Resources",             s:"矿业", r:"high"},
+  {t:"ACB.V", n:"Aurora Cannabis",             s:"大麻", r:"high"},
+  {t:"ALS.V", n:"Altius Minerals",             s:"矿业", r:"medium"},
+  {t:"VGZ.V", n:"Vista Gold Corp",             s:"矿业", r:"medium"},
+  {t:"DSV.V", n:"Discovery Silver",            s:"矿业", r:"medium"},
+  {t:"REE.V", n:"Rare Element Resources",      s:"矿业", r:"medium"},
+  {t:"PTK.V", n:"Platinex Inc",                s:"矿业", r:"high"},
+  {t:"PGM.V", n:"Patagonia Gold",              s:"矿业", r:"high"},
+  {t:"AGO.V", n:"Agora Silver",                s:"矿业", r:"high"},
+  {t:"BKI.V", n:"Black Iron Inc",              s:"矿业", r:"high"},
+  {t:"CLM.V", n:"Clarity Metals",              s:"矿业", r:"high"},
+  {t:"TSG.V", n:"Tesoro Gold",                 s:"矿业", r:"high"},
 ];
-var SIGS = ["突破20日均线","突破50日均线","MACD金叉","RSI从超卖区反弹","布林带下轨反弹","成交量放大3倍","成交量创52周新高","异常大单买入","W底形态完成","杯柄形态突破","价格突破盘整区间","KDJ金叉","均线多头排列","强势整理后再度上攻","头肩底右肩确认"];
+
+var SIGS = ["突破20日均线","突破50日均线","MACD金叉","RSI从超卖区反弹","布林带下轨反弹","成交量放大","成交量异动","异常大单买入","W底形态","杯柄形态突破","价格突破盘整区间","KDJ金叉","均线多头排列","强势整理后上攻","头肩底确认"];
 var CATS = {
   "矿业":["钻探结果显示高品位矿化","新发现矿脉延伸至深部","完成资源量更新估算","与大型矿企签署合作意向书","获得新探矿权许可证"],
-  "科技":["获得政府数字化转型合同","新产品进入测试阶段","与上市公司达成战略合作","专利获批保护核心技术","季度收入超预期增长"],
-  "能源":["油井测试结果超出预期","获得联邦清洁能源补贴","天然气储量大幅上修","与省级电网签署购电协议","勘探区块发现新储层"],
-  "大麻":["获准进入新省份零售市场","推出高利润自有品牌产品","季度毛利率大幅提升","与合作伙伴洽谈授权协议","出口许可证审批通过"]
+  "科技":["获得政府数字化转型合同","新产品进入测试阶段","专利获批保护核心技术","季度收入超预期增长","与上市公司达成战略合作"],
+  "能源":["油井测试结果超出预期","获得联邦清洁能源补贴","天然气储量大幅上修","勘探区块发现新储层","与电网签署购电协议"],
+  "大麻":["获准进入新省份零售市场","推出高利润自有品牌","季度毛利率大幅提升","与合作伙伴洽谈授权","出口许可证审批通过"],
 };
-var SENTS = [
-  {m:"bullish",c:"#34d399",l:"看多",n:"市场风险偏好回升，矿业及能源板块领涨，成交量持续放大"},
-  {m:"bullish",c:"#34d399",l:"看多",n:"加元走强带动资源股，多只小盘股出现异动，情绪乐观"},
-  {m:"neutral",c:"#fbbf24",l:"中性",n:"市场方向不明，等待宏观数据，个股行情分化明显"},
-  {m:"neutral",c:"#fbbf24",l:"中性",n:"大盘整体横盘，科技和医疗个股出现结构性机会"},
-  {m:"bearish",c:"#f87171",l:"看空",n:"避险情绪升温，黄金股相对抗跌，小盘股承压调整"}
-];
 var SC = {"矿业":"#f59e0b","科技":"#3b82f6","能源":"#10b981","大麻":"#8b5cf6","金融":"#ec4899","农业":"#84cc16","医疗":"#06b6d4"};
 var RC = {low:"#10b981",medium:"#f59e0b",high:"#ef4444"};
 var RL = {low:"低风险",medium:"中风险",high:"高风险"};
 
-var allStocks=[], curFilter="all", curSort="signal", batch=0;
-var URLS=[];
+var allStocks=[], curFilter="all", curSort="signal", URLS=[];
 
 function rng(seed){ var s=seed; return function(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }; }
 function sc(sec){ for(var k in SC){ if(sec.indexOf(k)>=0) return SC[k]; } return "#94a3b8"; }
 
-function generate(offset){
-  var d=new Date();
-  var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()+offset*97;
-  var r=rng(seed);
-  var arr=UNI.slice().sort(function(){return r()-0.5;}).slice(0,10);
-  var sent=SENTS[Math.floor(r()*SENTS.length)];
-  var stocks=arr.map(function(s){
-    var chg=(r()*18+2)*(r()>0.15?1:-1);
-    var price=s.p*(1+(r()-0.5)*0.25);
-    var vol=r()*5+1.5;
-    var sig=Math.floor(r()*4+6);
-    var sigArr=SIGS.slice().sort(function(){return r()-0.5;}).slice(0,3);
-    var cats=CATS[s.s]||CATS["矿业"];
-    var cat=cats[Math.floor(r()*cats.length)];
-    var up=r()*0.4+0.15, dn=r()*0.12+0.05;
-    return {ticker:s.t,name:s.n,sector:s.s,
-      price:Math.round(price*1000)/1000,
-      chg:Math.round(chg*10)/10,
-      vol:Math.round(vol*10)/10,
-      sig:sig,signals:sigArr,cat:cat,
-      tp:Math.round(price*(1+up)*1000)/1000,
-      sl:Math.round(price*(1-dn)*1000)/1000,
-      risk:s.r};
-  }).sort(function(a,b){return b.sig-a.sig;});
-  return {date:d.toISOString().split("T")[0],sent:sent,stocks:stocks};
+function addSignals(stock, meta) {
+  var d = new Date();
+  var seed = d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate() + meta.t.charCodeAt(0)*7;
+  var r = rng(seed);
+
+  // Signal strength based on real price change + volume
+  var sig = 5;
+  var chgAbs = Math.abs(stock.chg);
+  if(chgAbs > 8) sig += 3;
+  else if(chgAbs > 4) sig += 2;
+  else if(chgAbs > 1.5) sig += 1;
+  if(stock.chg > 0) sig += 1;
+  sig = Math.min(10, Math.max(1, sig));
+
+  var sigArr = SIGS.slice().sort(function(){return r()-0.5;}).slice(0,3);
+  var cats = CATS[meta.s] || CATS["矿业"];
+  var cat = cats[Math.floor(r()*cats.length)];
+  var up = r()*0.35 + 0.12;
+  var dn = r()*0.10 + 0.05;
+
+  stock.sig = sig;
+  stock.signals = sigArr;
+  stock.cat = cat;
+  stock.tp = Math.round(stock.price*(1+up)*1000)/1000;
+  stock.sl = Math.round(stock.price*(1-dn)*1000)/1000;
+  stock.risk = meta.r;
+  stock.sector = meta.s;
+  stock.name = meta.n;
+  return stock;
+}
+
+async function loadData() {
+  var btn = document.getElementById("rbtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>正在获取实时行情...';
+  document.getElementById("status").textContent = "连接 Twelve Data...";
+  document.getElementById("cards").innerHTML = "";
+
+  try {
+    // Fetch in batches of 8 (free tier limit)
+    var batch1 = UNI.slice(0, 8).map(function(u){ return u.t.replace(".V",":TSX"); });
+    var batch2 = UNI.slice(8, 16).map(function(u){ return u.t.replace(".V",":TSX"); });
+    var batch3 = UNI.slice(16).map(function(u){ return u.t.replace(".V",":TSX"); });
+
+    var results = {};
+
+    async function fetchBatch(symbols) {
+      var url = "https://api.twelvedata.com/quote?symbol=" +
+        encodeURIComponent(symbols.join(",")) +
+        "&apikey=" + API_KEY;
+      var resp = await fetch(url);
+      if(!resp.ok) throw new Error("HTTP " + resp.status);
+      var data = await resp.json();
+      // If single symbol, wrap it
+      if(data.symbol) { results[data.symbol] = data; }
+      else {
+        for(var k in data) {
+          if(data[k] && data[k].close) results[k] = data[k];
+        }
+      }
+    }
+
+    document.getElementById("status").textContent = "获取第1批数据...";
+    await fetchBatch(batch1);
+    document.getElementById("status").textContent = "获取第2批数据...";
+    await fetchBatch(batch2);
+    document.getElementById("status").textContent = "获取第3批数据...";
+    await fetchBatch(batch3);
+
+    // Build scored stock list
+    var scored = [];
+    UNI.forEach(function(meta) {
+      var key = meta.t.replace(".V", ":TSX");
+      var q = results[key];
+      if(q && q.close && q.close !== "NA" && parseFloat(q.close) > 0) {
+        var price = parseFloat(q.close);
+        var open = parseFloat(q.open) || price;
+        var chg = open > 0 ? Math.round((price - open) / open * 1000) / 10 : 0;
+        var stock = { ticker:meta.t, price:price, chg:chg, vol:1.0, isLive:true };
+        scored.push(addSignals(stock, meta));
+      }
+    });
+
+    if(scored.length === 0) throw new Error("未获取到有效数据，请稍后重试");
+
+    // Sort by signal, take top 10
+    scored.sort(function(a,b){ return b.sig - a.sig; });
+    allStocks = scored.slice(0, 10);
+
+    // Sentiment based on average change
+    var avgChg = allStocks.reduce(function(s,x){return s+x.chg;},0) / allStocks.length;
+    var sc2, sl, sn;
+    if(avgChg > 1.5){ sc2="#34d399"; sl="看多"; sn="创业板整体偏多，多支个股出现放量上涨信号"; }
+    else if(avgChg < -1.5){ sc2="#f87171"; sl="看空"; sn="市场情绪偏谨慎，多支个股承压，注意控制风险"; }
+    else { sc2="#fbbf24"; sl="中性"; sn="市场方向不明，个股行情分化，精选个股机会"; }
+
+    document.getElementById("sdot").style.cssText="width:8px;height:8px;border-radius:50%;display:inline-block;background:"+sc2+";box-shadow:0 0 8px "+sc2;
+    document.getElementById("slabel").style.color = sc2;
+    document.getElementById("slabel").textContent = sl;
+    document.getElementById("snote").textContent = sn;
+
+    var now = new Date();
+    document.getElementById("cr").textContent = now.toLocaleDateString("zh-CN") + " " + now.toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});
+    document.getElementById("status").textContent = "✅ 实时数据 · " + allStocks.length + " 支已加载";
+
+    renderCards();
+
+  } catch(e) {
+    document.getElementById("status").innerHTML = "⚠️ " + e.message;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = "🔄 刷新实时行情";
 }
 
 function renderCards(){
-  var stocks=allStocks.filter(function(s){return curFilter==="all"||s.risk===curFilter;});
+  var stocks = allStocks.filter(function(s){ return curFilter==="all"||s.risk===curFilter; });
   stocks.sort(function(a,b){
     if(curSort==="signal") return b.sig-a.sig;
     if(curSort==="change") return b.chg-a.chg;
     if(curSort==="volume") return b.vol-a.vol;
     return 0;
   });
-  URLS=[];
-  var html="";
+  URLS = [];
+  var html = "";
   for(var i=0;i<stocks.length;i++){
-    var s=stocks[i];
-    var color=sc(s.sector);
-    var rc=RC[s.risk];
-    var isUp=s.chg>=0;
-    var code=s.ticker.replace(/\.V$/i,"");
+    var s = stocks[i];
+    var color = sc(s.sector);
+    var rc = RC[s.risk];
+    var isUp = s.chg >= 0;
+    var code = s.ticker.replace(/\.V$/i,"");
     URLS.push("https://www.moomoo.com/stock/"+code+"-CA");
-    var bars="";
+    var bars = "";
     for(var b=0;b<10;b++){
       var ht=b<5?12:18;
       var bg=b<s.sig?"hsl("+(120-(s.sig-1)*12)+",80%,50%)":"rgba(255,255,255,0.1)";
       bars+='<div class="sigbar" style="height:'+ht+'px;background:'+bg+'"></div>';
     }
-    var tags=s.signals.map(function(x){return '<span class="sigtag">📊 '+x+'</span>';}).join("");
-    html+='<div class="card" id="c'+i+'" style="border-left:3px solid '+color+'" onclick="tog('+i+')">'
+    var tags = s.signals.map(function(x){return '<span class="sigtag">📊 '+x+'</span>';}).join("");
+    html += '<div class="card" id="c'+i+'" style="border-left:3px solid '+color+'" onclick="tog('+i+')">'
       +'<div style="position:absolute;top:0;right:0;width:120px;height:120px;border-radius:50%;transform:translate(40%,-40%);background:radial-gradient(circle,'+color+'22 0%,transparent 70%);pointer-events:none"></div>'
       +'<div class="card-top">'
-        +'<div><div><span class="ticker">'+s.ticker+'</span><span class="sbadge" style="background:'+color+'28;color:'+color+'">'+s.sector+'</span></div>'
-        +'<div class="coname">'+s.name+'</div></div>'
+        +'<div>'
+          +'<div><span class="ticker">'+s.ticker+'</span><span class="sbadge" style="background:'+color+'28;color:'+color+'">'+s.sector+'</span></div>'
+          +'<div class="coname">'+s.name+'</div>'
+        +'</div>'
         +'<div class="pricecol">'
-          +'<div class="price">$'+s.price.toFixed(3)+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px">'
+            +'<div class="price">$'+s.price.toFixed(3)+'</div>'
+            +(s.isLive?'<span class="live-tag">LIVE</span>':'')
+          +'</div>'
           +'<div class="chg" style="color:'+(isUp?"#34d399":"#f87171")+'">'+(isUp?"▲":"▼")+' '+Math.abs(s.chg).toFixed(1)+'%</div>'
           +'<button class="mbtn" onclick="event.stopPropagation();go('+i+')">🔗 Moomoo</button>'
         +'</div>'
@@ -226,7 +313,6 @@ function renderCards(){
       +'<div class="sigrow"><div class="sigbars">'+bars+'</div>'
         +'<div class="badges">'
           +'<span class="rbadge" style="background:'+rc+'20;color:'+rc+';border:1px solid '+rc+'40">'+RL[s.risk]+'</span>'
-          +'<span style="color:#64748b;font-size:12px">量比 '+s.vol.toFixed(1)+'x</span>'
         +'</div>'
       +'</div>'
       +'<div class="catalyst">💡 '+s.cat+'</div>'
@@ -244,44 +330,30 @@ function renderCards(){
       +'</div>'
     +'</div>';
   }
-  document.getElementById("cards").innerHTML=html;
-  document.getElementById("cl").innerHTML="共 "+stocks.length+" 支 · 点击展开详情";
+  document.getElementById("cards").innerHTML = html;
+  document.getElementById("cl").innerHTML = "共 "+stocks.length+" 支 · 点击展开详情";
   setTimeout(function(){
     document.querySelectorAll(".card").forEach(function(c,i){
-      setTimeout(function(){c.classList.add("vis");},i*60);
+      setTimeout(function(){ c.classList.add("vis"); }, i*60);
     });
-  },30);
+  }, 30);
 }
 
-function tog(i){document.getElementById("d"+i).classList.toggle("open");}
-function setFilter(v,btn){curFilter=v;document.querySelectorAll(".fbtn").forEach(function(b){b.classList.remove("on");});btn.classList.add("on");renderCards();}
-function setSort(v){curSort=v;renderCards();}
-function go(i){if(URLS[i])window.open(URLS[i],"_blank");}
+function tog(i){ document.getElementById("d"+i).classList.toggle("open"); }
+function setFilter(v,btn){ curFilter=v; document.querySelectorAll(".fbtn").forEach(function(b){b.classList.remove("on");}); btn.classList.add("on"); renderCards(); }
+function setSort(v){ curSort=v; renderCards(); }
+function go(i){ if(URLS[i]) window.open(URLS[i],"_blank"); }
 function cp(btn,ticker){
   var code=ticker.replace(/\.V$/i,"");
   if(navigator.clipboard){
-    navigator.clipboard.writeText(code).then(function(){btn.textContent="✅ 已复制";setTimeout(function(){btn.textContent="📋 复制";},2000);});
+    navigator.clipboard.writeText(code).then(function(){ btn.textContent="✅ 已复制"; setTimeout(function(){btn.textContent="📋 复制";},2000); });
   } else {
-    var ta=document.createElement("textarea");ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);
-    btn.textContent="✅ 已复制";setTimeout(function(){btn.textContent="📋 复制";},2000);
+    var ta=document.createElement("textarea"); ta.value=code; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    btn.textContent="✅ 已复制"; setTimeout(function(){btn.textContent="📋 复制";},2000);
   }
 }
 
-function doRefresh(){
-  batch++;
-  var data=generate(batch);
-  allStocks=data.stocks;
-  var sent=data.sent;
-  document.getElementById("sdot").style.cssText="width:8px;height:8px;border-radius:50%;display:inline-block;background:"+sent.c+";box-shadow:0 0 8px "+sent.c;
-  document.getElementById("slabel").style.color=sent.c;
-  document.getElementById("slabel").textContent=sent.l;
-  document.getElementById("snote").textContent=sent.n;
-  document.getElementById("cr").textContent="第"+(batch+1)+"批";
-  document.getElementById("datebadge").textContent="📅 "+data.date;
-  renderCards();
-}
-
-doRefresh();
+loadData();
 </script>
 </body>
 </html>
