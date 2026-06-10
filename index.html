@@ -109,7 +109,8 @@ select { padding:6px 10px; border-radius:8px; font-size:11px; border:1px solid r
 </div>
 
 <script>
-var API_KEY = "7a36aa9f7bfb4546a6454355d858339b";
+var API_KEY = "7a36aa9f7bfb4546a6454355d858339b"; // Twelve Data (backup)
+var FMP_KEY = "u2iABrYCsVYYwDw1cfHK6CIU1suTKflA"; // FMP
 
 var UNI = [
   {t:"LME.V", n:"Laurion Mineral Exploration", s:"矿业", r:"high"},
@@ -206,25 +207,29 @@ function generateSimulated(offset) {
 
 async function tryFetchLive() {
   var now = Date.now();
-  if(now - lastApiCall < 60000) return null; // 1 min cooldown
+  if(now - lastApiCall < 60000) return null;
   lastApiCall = now;
   try {
-    var symbols = UNI.slice(0,8).map(function(u){return u.t.replace(".V",":TSX");});
-    var url = "https://api.twelvedata.com/quote?symbol="+encodeURIComponent(symbols.join(","))+"&apikey="+API_KEY;
-    var resp = await fetch(url, {signal: AbortSignal.timeout(6000)});
+    // Use FMP API - TSX symbols use .TO suffix
+    var symbols = UNI.slice(0,8).map(function(u){return u.t.replace(".V",".TO");});
+    var url = "https://financialmodelingprep.com/api/v3/quote/"+symbols.join(",")+
+      "?apikey="+FMP_KEY;
+    var resp = await fetch(url, {signal: AbortSignal.timeout(8000)});
     if(!resp.ok) return null;
     var data = await resp.json();
-    if(data.status==="error") return null;
+    if(!Array.isArray(data) || data.length===0) return null;
     var results = {};
-    if(data.symbol){ results[data.symbol]=data; }
-    else { for(var k in data){ if(data[k]&&data[k].close&&data[k].close!=="NA") results[k]=data[k]; } }
+    data.forEach(function(q){ results[q.symbol] = q; });
     var scored = [];
-    UNI.forEach(function(meta){
-      var q = results[meta.t.replace(".V",":TSX")];
-      if(q&&q.close&&parseFloat(q.close)>0){
-        var price=parseFloat(q.close), open=parseFloat(q.open)||price;
-        var chg=open>0?Math.round((price-open)/open*1000)/10:0;
-        scored.push(addSignals({ticker:meta.t,price:price,chg:chg,vol:1.0,isLive:true},meta));
+    UNI.slice(0,8).forEach(function(meta){
+      var key = meta.t.replace(".V",".TO");
+      var q = results[key];
+      if(q && q.price && q.price > 0){
+        var price = q.price;
+        var chg = q.changesPercentage ? Math.round(q.changesPercentage*10)/10 : 0;
+        var vol = (q.volume && q.avgVolume && q.avgVolume>0) ?
+          Math.round(q.volume/q.avgVolume*10)/10 : 1.0;
+        scored.push(addSignals({ticker:meta.t,price:price,chg:chg,vol:vol,isLive:true},meta));
       }
     });
     if(scored.length===0) return null;
